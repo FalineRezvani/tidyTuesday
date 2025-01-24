@@ -1,0 +1,334 @@
+---
+title: "tidyTuesday1_21"
+output:
+  word_document: default
+  html_document: default
+date: "2025-01-21"
+developer: Faline Rezvani
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# A sample from the Himalayan Database was provided to us for this week's tidyTuesday challenge.
+
+```{r}
+tuesdata <- tidytuesdayR::tt_load('2025-01-21')
+```
+
+```{r}
+exped_tidy <- tuesdata$exped_tidy
+```
+
+
+```{r}
+peaks_tidy <- tuesdata$peaks_tidy
+```
+
+
+```{r}
+library(tidytuesdayR)
+library(tidyverse)
+```
+
+
+```{r}
+# Joining only the peaks which have records in the peaks_tidy dataset
+# resulting in the same sample size as 'exped_tidy' dataset, 882,
+# but with 97 columns.
+df = merge(x = exped_tidy, y = peaks_tidy, by = "PEAKID")
+```
+
+
+```{r}
+# Creating a new column for 'TOTAL_FATALS'
+df<-df %>% mutate(TOTDEATHS = MDEATHS + HDEATHS)
+```
+
+
+```{r}
+# Restricting df to only include fatal expeditions
+fatals<-filter(df, TOTDEATHS > 0)
+```
+
+
+```{r}
+#View(fatals)
+```
+
+
+```{r}
+# Restricting columns of df
+fatals<-fatals %>% select(AGENCY, TOTDEATHS, HOST, PKNAME, YEAR,
+         ROUTE1, SUCCESS1, SPONSOR, TERMREASON_FACTOR, SEASON,
+         O2USED, PCOUNTRY, HEIGHTM, REGION, PEAKID)
+```
+
+
+```{r}
+sum(fatals$TOTDEATHS)
+```
+# 882 total expeditions between 2020-2024.
+#
+# 116 peaks total documented in the Himalayan Database.
+#
+# 53 fatalities occured between 2020-2024.
+#
+# What do these expeditions have in common?
+
+```{r}
+# Fatalities per agency
+fatals %>% 
+  group_by(AGENCY) %>% 
+  summarize(sum(TOTDEATHS))
+```
+
+# Seven Summit Treks (7 Summits Adventure is the same company) leads with 15 fatalities in 4 years. 8K Expeditions is next with 6.
+#
+# How many treks has each agency hosted?
+
+```{r}
+# Creating dataframe from tibble
+# "Tallying" instances of each PEAKID recorded for each agency
+treks <- as.data.frame(df %>% 
+  group_by(AGENCY, PEAKID) %>% 
+  summarize(n = n()))
+```
+
+```{r}
+#View(treks)
+```
+
+
+```{r}
+write.csv(treks,"C:/Users/falin/Desktop/RProjectBeginner_2025/himalayantreks.csv")
+```
+
+# Seven Summits has highest number of treks, 12.1% fatalities compared to total.
+#
+# Himalayan Guides has second highest number of treks, low percentage of 3.4%.
+#
+# 8K Expeditions has third highest number of treks
+# and highest fatality percentage of 15.8%.
+#
+# Satori Adventures has fourth highest number of treks
+# and lowest fatality percentage of 3.1%.
+#
+# Imagine Nepal has third highest fatality percentage of 11.1%.
+#
+# What is unique about these agencies, or treks?
+
+```{r}
+# Isolates 32 records for 8K Expeditions
+eightk_df <- filter(df, AGENCY == "8K Expeditions")
+```
+
+```{r}
+# Restricting df to 15 columns
+eightk_df<-eightk_df %>% select(AGENCY, TOTDEATHS, HOST, PKNAME, YEAR,
+         ROUTE1, SUCCESS1, SPONSOR, TERMREASON_FACTOR, SEASON,
+         O2USED, PCOUNTRY, HEIGHTM, REGION)
+```
+
+```{r}
+#View(eightk_df)
+```
+
+```{r}
+# Isolates 32 records for Seven Summit Treks
+ss_df <- filter(df, AGENCY == "Seven Summit Treks")
+```
+
+```{r}
+# Restricting df to 15 columns
+ss_df<-ss_df %>% select(AGENCY, TOTDEATHS, HOST, PKNAME, YEAR,
+         ROUTE1, SUCCESS1, SPONSOR, TERMREASON_FACTOR, SEASON,
+         O2USED, PCOUNTRY, HEIGHTM, REGION)
+```
+
+```{r}
+#View(ss_df)
+```
+
+```{r}
+# Isolates 58 records for Himalayan Guides
+hg_df <- filter(df, AGENCY == "Himalayan Guides")
+```
+
+```{r}
+# Restricting df to 15 columns
+hg_df<-hg_df %>% select(AGENCY, TOTDEATHS, HOST, PKNAME, YEAR,
+         ROUTE1, SUCCESS1, SPONSOR, TERMREASON_FACTOR, SEASON,
+         O2USED, PCOUNTRY, HEIGHTM, REGION)
+```
+
+```{r}
+#View(hg_df)
+```
+
+```{r}
+# Isolates 24 records for Imagine Nepal
+imag_df <- filter(df, AGENCY == "Imagine Nepal")
+```
+
+```{r}
+# Restricting df to 15 columns
+imag_df<-imag_df %>% select(AGENCY, TOTDEATHS, HOST, PKNAME, YEAR,
+         ROUTE1, SUCCESS1, SPONSOR, TERMREASON_FACTOR, SEASON,
+         O2USED, PCOUNTRY, HEIGHTM, REGION)
+```
+
+```{r}
+#View(imag_df)
+```
+
+
+```{r}
+# Isolates 27 records for Pioneer Adventures
+pion_df <- filter(df, AGENCY == "Pioneer Adventure")
+```
+
+```{r}
+# Restricting df to 15 columns
+pion_df<-pion_df %>% select(AGENCY, TOTDEATHS, HOST, PKNAME, YEAR,
+         ROUTE1, SUCCESS1, SPONSOR, TERMREASON_FACTOR, SEASON,
+         O2USED, PCOUNTRY, HEIGHTM, REGION)
+```
+
+```{r}
+#View(pion_df)
+```
+
+# What is unique about these agencies, or treks?
+#
+#
+#
+# 8K Expeditions went to the Everest peak 8 times using 'S Col-SE Ridge' route
+# with 6 resulting fatalities.
+#
+# Imagine Nepal went to the Everest peak 5 times using 'S Col-SE Ridge' route
+# with 3 resulting fatalities.
+# 
+# Pioneer Adventure went to Everest peak 7 times using 'S Col-SE Ridge' route
+# with 2 resulting fatalities.
+#
+# Seven Summit Treks went to Everet peak 19 times using 'S Col-SE Ridge' route
+# with 7 resulting fatalities.
+#
+# Himalayan Guides went to Everest peak 13 times using 'S Col-SE Ridge' route
+# with 1 resulting fatality.
+#
+#
+#
+# 22 of the 29 total fatalities resulting in the treks of these five agencies
+# occured on 'S Col-SE Ridge' route, the most commonly used route to access the
+# Everest peak due to the accessibility of its entry point. (75.9%)
+#
+# 22 fatalities of the 279 treks hightlighted here occured on
+# the 'S Col-SE Ridge' route. (7.9%)
+#
+#
+#
+# The total 52 treks to Everest peak made by these five agencies between the years
+# 2020-2024 resulted in 22 fatalities. (42.3%)
+#
+#
+#
+# Next Step: Encode character variables 'PKNAME' and 'AGENCY' using 'fatals' df.
+
+
+```{r}
+# Restricting columns of df
+fatal_peaks<-fatals %>% select(AGENCY, TOTDEATHS, PKNAME, PEAKID)
+```
+
+```{r}
+# Removing two rows containing null values
+fatal_peaks<-na.omit(fatal_peaks)
+```
+
+```{r}
+# Encoding 'PKNAME' column
+fatal_peaks$PKNAME<-as.integer(factor(fatal_peaks$PKNAME))
+```
+
+```{r}
+# Encoding 'AGENCY' column
+fatal_peaks$AGENCY<-as.integer(factor(fatal_peaks$AGENCY))
+```
+
+```{r}
+View(fatal_peaks)
+```
+
+```{r}
+# Visualization
+# Count of fatal expeditions by peak
+fatalTrekByPeak<-ggplot(fatal_peaks, aes(x = PKNAME)) +
+  geom_histogram(binwidth=1,boundary=-0.5, color="#000000", fill="#0099F8") +
+  labs(x="Himalayan Peak", y="Number of Fatal Expeditions") +
+  ggtitle("36 Fatal Expeditions by Peak") +
+  labs(caption = "Source: The Himalayan Database. \n ALT TEXT: This bar chart shows the 36 fatal expeditions distributed over peaks. The Everest peak saw 21 fatal expeditions") +
+  scale_x_continuous(breaks=1:11)
+```
+
+```{r}
+fatalTrekByPeak
+```
+
+```{r}
+ggsave(fatalTrekByPeak, 
+       filename = "fatalTrekByPeak.pdf",
+       device = "pdf",
+       height = 6, width = 9, units = "in")
+```
+
+
+# Add legend
+#
+# This bar chart visualizes the 36 fatal expeditions distributed over peak name.
+# The Everest peak saw 21 fatal expeditions resulting in 34 fatalities.
+
+```{r}
+total_peaks<-sort(table(df$PKNAME), decreasing=TRUE)
+```
+
+```{r}
+total_peaks <- head(total_peaks, 10)
+```
+
+```{r}
+View(total_peaks)
+```
+
+```{r}
+# Visualization II
+# Count of total expeditions by peak
+trekByPeak<-barplot(total_peaks, main="689 Himalayan Expeditions by Peak", xlab="Number of Expeditions",
+        horiz=TRUE, col="Blue", xlim=c(0,200), las=1, cex.names=0.75)
+```
+
+```{r}
+ggsave(trekByPeak, 
+       filename = "trekByPeak.pdf",
+       device = "pdf",
+       height = 6, width = 5, units = "in")
+```
+
+# Findings:
+#
+# Out of the 189 total expeditions to the Everest peak between the years 2020-2024,
+# 21 were fatal expeditions resulting in 34 fatalities.
+#
+# Out of the 36 fatal expeditions across the Himalayas between the years 2020-2024,
+# 21 were to the Everest peak.
+#
+#
+#
+#
+# The Mountaineering Disaster Relief and Education Support (MDRES)
+# Fund Committee was founded to award a scholarship of Rs. 6,000/month
+# to children affected by loss of life during expeditions.
+#
+# This analysis does not imply causation.
