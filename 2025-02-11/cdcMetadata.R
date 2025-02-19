@@ -1,7 +1,7 @@
 ---
 title: "tidyTuesday02-11"
 output: html_document
-date: "2025-02-18"
+date: "2025-02-19"
 developer: Faline Rezvani
 ---
 
@@ -130,7 +130,8 @@ ggsave(filename = "cdcDataPrograms.png",
   labs(title = 'Datasets by Program within Federal Bureau',
        x = '# of Datasets',
        y = 'Program',
-       fill = 'Bureau') +
+       fill = 'Bureau',
+       caption = "Source: Curated by Jon Harmon via archive.org for the Tidy Tuesday project.") +
   theme(axis.text.x=element_text(angle=45, hjust=1)),
   width = 12, height = 4, dpi = 300, units = "in", device='png')
 ```
@@ -144,7 +145,8 @@ top_categories <- count(cdc_datasets, category, sort = TRUE) |>
   mutate(category = fct_reorder(category, n)) |>
   ggplot(aes(n, category)) +
   geom_col() +
-  labs(title = 'Most Common Categories in Archived Datatsets') +
+  labs(title = 'Most Common Categories in Archived Datatsets',
+       caption = "Source: Curated by Jon Harmon via archive.org for the Tidy Tuesday project.") +
   theme_set(theme_minimal(base_size = 8))
 ```
 
@@ -172,7 +174,7 @@ ggsave(filename = "cdcDataCategories.png",
        x = '# of Datasets',
        y = 'Category',
        fill = 'Program',
-       caption = "Source: Curated by Jon Harmon via archive.org for the Tidy Tuesday project.") +
+       caption = "Source: CDC metadata datasets curated by Jon Harmon via archive.org for the TidyTuesday Data Science project.") +
   theme_set(theme_minimal(base_size = 8)),
   width = 10, height = 4, dpi = 300, units = "in", device='png')
 ```
@@ -180,6 +182,7 @@ ggsave(filename = "cdcDataCategories.png",
 ## Inspecting tags related to category, 'Public Health Surveillance'.
 
 ```{r}
+# Isolating category, Public Health Surveillance
 public_health <- df |>
   filter(category == 'Public Health Surveillance')
 ```
@@ -233,6 +236,8 @@ v <- sort(rowSums(m), decreasing = TRUE)
 d <- data.frame(word=names(v), frequency=v)
 ```
 
+# Visualizing top ten tags associated with Public Health Surveillance
+
 ```{r}
 public_tags <- head(d, 10)
 ```
@@ -256,7 +261,7 @@ public_tags_viz <- ggplot(public_tags, aes(x=word, y=frequency, fill = word)) +
 ```
 
 ```{r}
-# Spider plot
+# Creating dataframe with specifications needed for radarchart() spider plot
 data <- as.data.frame(matrix(c(34, 31, 22, 20, 20, 15, 15, 13, 12, 12), nrow=1))
  
 colnames(data) <- c("respiratory" , "coronavirus" , "virus" ,
@@ -264,10 +269,53 @@ colnames(data) <- c("respiratory" , "coronavirus" , "virus" ,
                     "rsv", "rates", "icu", "syncytial" )
   
 data <- rbind(rep(39,10) , rep(0,10) , data)
+
+radarchart(data, axistype = 1, title = 'Tag Frequency within Public Health Surveillance Datasets',
+           cglcol="grey", axislabcol="grey", vlcex = 1, caxislabels = seq(0,40,10))
+```
+
+# What programs are associated with these top ten Public Health Surveillance tags?
+
+```{r}
+program_top_tags <- df |>
+  filter(grepl('virus|hospital|icu|influenza|respiratory|rsv|coronavirus|syncytial|beds|rates', tags))
 ```
 
 ```{r}
-radarchart(data, title = 'Tag Frequency within Public Health Surveillance Datasets')
+program_top_tags <- subset(program_top_tags, program_name != 'Program Management')
 ```
 
-# Need help saving this plot
+```{r}
+program_top_tags <- count(program_top_tags, program_name, sort = TRUE)
+```
+
+```{r}
+# Create mapping as aliases to program_names
+program_alias <- c("CDC-Wide Activities and Program Support" = "CDC Activities & Support",
+                  "Emerging and Zoonotic Infectious Diseases" = "Emerging & Zoonotic Infectious Diseases",
+                  "Environmental Health" = "Environmental Health",
+                  "Immunization and Respiratory Diseases" = "Immunization & Respiratory Diseases",
+                  "Public Health Preparedness and Response" = "Public Health Preparedness & Response")
+```
+
+```{r}
+# Controlling image size with ggsave
+ggsave(filename = "cdcProgramTopTags.png",
+  ggplot(program_top_tags, aes(n, program_name, color = n)) +
+  geom_point(size = 6) +
+#  geom_line(position = 'identity', color = 'black') +
+  coord_flip() +
+  scale_y_discrete(labels = program_alias) +
+  labs(title = 'Programs Attaching Top-10 Tags to Data',
+       x = '',
+       y = '',
+       color = '# of Datasets',) +
+  theme(axis.text.x=element_text(size = 14, angle=45, hjust=1),
+        axis.text.y=element_blank(),
+        plot.title = element_text(size = 20),
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 12)) +
+  expand_limits(y = 0),
+  width = 10, height = 6, dpi = 300, units = "in", device='png')
+```
+
