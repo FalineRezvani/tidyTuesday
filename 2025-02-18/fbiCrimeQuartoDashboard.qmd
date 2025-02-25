@@ -1,0 +1,93 @@
+---
+title: "FBI Crime Data Dashboard"
+format: dashboard
+editor: visual
+---
+
+Quarto
+
+This Quarto document will analyze FBI Crime Data provided to the TidyTuesday Data Science Learning Community project courtesy of Ford Johnson.
+This document has been published as a Quarto dashboard using RPubs and can be viewed [here](https://rpubs.com/falineR/1276447).
+
+{r}
+library(tidyverse)
+
+{r}
+tuesdata <- tidytuesdayR::tt_load('2025-02-18')
+
+{r}
+agencies <- tuesdata$agencies
+
+Agencies by Type
+
+{r}
+fl_agency_type <- filter(agencies, state == 'Florida')
+
+{r}
+fl_agency_type <- fl_agency_type %>% count(agency_type, sort = TRUE)
+
+{r}
+fl_agency_type <- na.omit(fl_agency_type)
+
+{r}
+#| title: 'Agencies by Type in FL'
+ggplot(fl_agency_type, aes(n, agency_type)) +
+       geom_col() +
+       labs(x = '# of Agencies',
+       y = 'Agency Type')
+
+{r}
+ny_agency_type <- filter(agencies, state == 'New York')
+
+{r}
+ny_agency_type <- ny_agency_type %>% count(agency_type, sort = TRUE)
+
+{r}
+ny_agency_type <- na.omit(ny_agency_type)
+
+{r}
+#| title: 'Agencies by Type in NY'
+ggplot(ny_agency_type, aes(n, agency_type)) +
+       geom_col() +
+       labs(x = '# of Agencies',
+       y = 'Agency Type')
+
+{r}
+pa_agency_type <- filter(agencies, state == 'Pennsylvania')
+
+{r}
+pa_agency_type <- pa_agency_type %>% count(agency_type, sort = TRUE)
+
+{r}
+pa_agency_type <- na.omit(pa_agency_type)
+
+{r}
+#| title: 'Agencies by Type in PA'
+ggplot(pa_agency_type, aes(n, agency_type)) +
+       geom_col() +
+       labs(x = '# of Agencies',
+       y = 'Agency Type')
+
+2021-2023 Hate crimes in Non-NIBRS Compliant States
+
+{r}
+# Loading Hate Crime .csv file from local location
+hate_crimes <- read.csv("C:/Users/falin/Documents/Professional/datasets/hate_crime/21-23hateCrime.csv")
+
+{r}
+# Grabbing only these states from state_name column
+non_nibrs <- hate_crimes %>%
+  filter(grepl('Florida|Pennsylvania|New York', state_name))
+
+{r}
+non_nibrs_states <- non_nibrs %>% count(state_name, agency_type_name, sort = TRUE)
+
+{r}
+#| title: '2021-2023 Hate Crimes by Agency Type in Non-NIBRS Compliant States'
+ggplot(non_nibrs_states, aes(n, state_name, fill = agency_type_name)) +
+  geom_col() +
+  labs(x = '# of Hate Crimes',
+       y = 'State',
+       fill = 'Agency Type',
+       caption = "Source: FBI Crime Data curated by Ford Johnson for the TidyTuesday Data Science Learning Community project.")
+
